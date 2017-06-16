@@ -8,6 +8,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
+import com.landy.dynamicload.proxy.DynamicProxyShopping;
+import com.landy.dynamicload.proxy.MLog;
+import com.landy.dynamicload.proxy.ProxyShopping;
+import com.landy.dynamicload.proxy.Shopping;
+import com.landy.dynamicload.proxy.ShoppingImp;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -22,6 +28,29 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ShoppingImp shoppingImp = new ShoppingImp();
+                MLog.log("================");
+                String[] goods = shoppingImp.doShop(100);
+                for (String good : goods) {
+                    MLog.log(good);
+                }
+                shoppingImp.buySomeFood(100);
+
+                ProxyShopping proxyShopping = new ProxyShopping(shoppingImp);
+                MLog.log("================");
+                goods = proxyShopping.doShop(100);
+                for (String good : goods) {
+                    MLog.log(good);
+                }
+
+                MLog.log("================");
+                Shopping shopping = new DynamicProxyShopping(shoppingImp).bind();
+                goods = shopping.doShop(100);
+                for (String good : goods) {
+                    MLog.log(good);
+                }
+                shopping.buySomeFood(100);
+
                 try {
                     attachActivityContext(MainActivity.this);
                 } catch (Exception e) {
