@@ -15,5 +15,19 @@
         android:id="@+id/openActivity"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="open second activity!"/>
+        android:text="hook剪切板服务"/>
+
+    <EditText
+        android:id="@+id/edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/openActivity"/>
+
+    <Button
+        android:id="@+id/openNewActivity"
+        android:layout_below="@id/edittext"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="open new activity"/>
+
 </RelativeLayout>
