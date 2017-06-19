@@ -25,9 +25,16 @@
 
     <Button
         android:id="@+id/openNewActivity"
-        android:layout_below="@id/edittext"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:layout_below="@id/edittext"
         android:text="open new activity"/>
+
+    <Button
+        android:id="@+id/openNotDefineActivity"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/openNewActivity"
+        android:text="open not define activity"/>
 
 </RelativeLayout>

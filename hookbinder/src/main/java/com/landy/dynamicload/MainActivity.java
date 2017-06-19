@@ -13,7 +13,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
         MLog.log("===========================");
         Button button = (Button) findViewById(R.id.openActivity);
         button.setOnClickListener(new View.OnClickListener() {
@@ -38,11 +38,23 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(t);
             }
         });
+
+        findViewById(R.id.openNotDefineActivity).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, TargetActivity.class));
+            }
+        });
     }
 
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
-        SystemServiceHookHelper.hookActivityManager();
+        try {
+            SystemServiceHookHelper.hookActivityManager();
+            SystemServiceHookHelper.hookActivityThreadHandler();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

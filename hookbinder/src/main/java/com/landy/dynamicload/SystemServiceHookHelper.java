@@ -1,5 +1,6 @@
 package com.landy.dynamicload;
 
+import android.os.Handler;
 import android.os.IBinder;
 
 import java.lang.reflect.Field;
@@ -12,6 +13,7 @@ import java.util.Map;
  */
 
 public class SystemServiceHookHelper {
+    public static final String EXTRA_TARGET_INTENT = "extra_target_intent";
     private static final String CLIPBOARD_SERVICE = "clipboard";
 
     public static void hookClipboardService() throws Exception {
@@ -37,29 +39,68 @@ public class SystemServiceHookHelper {
         cache.put(CLIPBOARD_SERVICE, hookedBinder);
     }
 
-    public static void hookActivityManager() {
-        try {
-            Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
+    public static void hookActivityManager() throws IllegalAccessException, ClassNotFoundException, NoSuchFieldException {
+        Class<?> activityManagerNativeClass = Class.forName("android.app.ActivityManagerNative");
 
-            // 获取 gDefault 这个字段, 想办法替换它
-            Field gDefaultField = activityManagerNativeClass.getDeclaredField("gDefault");
-            gDefaultField.setAccessible(true);
+        // 获取 gDefault 这个字段, 想办法替换它
+        Field gDefaultField = activityManagerNativeClass.getDeclaredField("gDefault");
+        gDefaultField.setAccessible(true);
 
-            Object gDefault = gDefaultField.get(null);
+        Object gDefault = gDefaultField.get(null);
 
-            // 4.x以上的gDefault是一个 android.util.Singleton对象; 我们取出这个单例里面的字段
-            Class<?> singleton = Class.forName("android.util.Singleton");
-            Field mInstanceField = singleton.getDeclaredField("mInstance");
-            mInstanceField.setAccessible(true);
+        // 4.x以上的gDefault是一个 android.util.Singleton对象; 我们取出这个单例里面的字段
+        Class<?> singleton = Class.forName("android.util.Singleton");
+        Field mInstanceField = singleton.getDeclaredField("mInstance");
+        mInstanceField.setAccessible(true);
 
-            // ActivityManagerNative 的gDefault对象里面原始的 IActivityManager对象
-            Object rawIActivityManager = mInstanceField.get(gDefault);
+        // ActivityManagerNative 的gDefault对象里面原始的 IActivityManager对象
+        Object rawIActivityManager = mInstanceField.get(gDefault);
 
-            // 创建一个这个对象的代理对象, 然后替换这个字段, 让我们的代理对象帮忙干活
-            mInstanceField.set(gDefault, new ActivityManagerInvocationHandler().bind(rawIActivityManager));
-        } catch (Exception e) {
-            throw new RuntimeException("Hook Failed", e);
-        }
+        // 创建一个这个对象的代理对象, 然后替换这个字段, 让我们的代理对象帮忙干活
+        mInstanceField.set(gDefault, new ActivityManagerInvocationHandler().bind(rawIActivityManager));
+    }
+
+    /**
+     * 由于之前我们用替身欺骗了AMS; 现在我们要换回我们真正需要启动的Activity
+     * <p/>
+     * 不然就真的启动替身了, 狸猫换太子...
+     * <p/>
+     * 到最终要启动Activity的时候,会交给ActivityThread 的一个内部类叫做 H 来完成
+     * H 会完成这个消息转发; 最终调用它的callback
+     */
+    public static void hookActivityThreadHandler() throws Exception {
+
+        // 先获取到当前的ActivityThread对象
+        Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
+        Field currentActivityThreadField = activityThreadClass.getDeclaredField("sCurrentActivityThread");
+        currentActivityThreadField.setAccessible(true);
+        Object currentActivityThread = currentActivityThreadField.get(null);
+
+        // 由于ActivityThread一个进程只有一个,我们获取这个对象的mH
+        Field mHField = activityThreadClass.getDeclaredField("mH");
+        mHField.setAccessible(true);
+        Handler mH = (Handler) mHField.get(currentActivityThread);
+
+        // 设置它的回调, 根据源码:
+        // 我们自己给他设置一个回调,就会替代之前的回调;
+
+        //        public void dispatchMessage(Message msg) {
+        //            if (msg.callback != null) {
+        //                handleCallback(msg);
+        //            } else {
+        //                if (mCallback != null) {
+        //                    if (mCallback.handleMessage(msg)) {
+        //                        return;
+        //                    }
+        //                }
+        //                handleMessage(msg);
+        //            }
+        //        }
+
+        Field mCallBackField = Handler.class.getDeclaredField("mCallback");
+        mCallBackField.setAccessible(true);
+
+        mCallBackField.set(mH, new ActivityThreadHandlerCallback(mH));
 
     }
 }
