@@ -37,4 +37,11 @@
         android:layout_below="@id/openNewActivity"
         android:text="open not define activity"/>
 
+    <Button
+        android:id="@+id/openDexActivity"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/openNotDefineActivity"
+        android:text="open dex activity"/>
+
 </RelativeLayout>

@@ -1,2 +1,2 @@
-include ':proxyreflect'
+include ':proxyreflect', ':runtimedex'
 include ':hookbinder'

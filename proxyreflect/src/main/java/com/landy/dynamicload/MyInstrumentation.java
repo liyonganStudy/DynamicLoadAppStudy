@@ -10,10 +10,6 @@ import android.util.Log;
 
 import java.lang.reflect.Method;
 
-/**
- * Created by landy on 17/6/15.
- */
-
 public class MyInstrumentation extends Instrumentation {
 
     private static final String TAG = "lya";
