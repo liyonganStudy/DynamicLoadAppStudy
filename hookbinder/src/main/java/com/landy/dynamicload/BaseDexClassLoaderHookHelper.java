@@ -59,6 +59,5 @@ public final class BaseDexClassLoaderHookHelper {
 
         // 替换
         dexElementArray.set(pathListObj, newElements);
-
     }
 }

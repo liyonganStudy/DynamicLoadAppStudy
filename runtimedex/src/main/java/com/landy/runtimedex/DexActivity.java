@@ -18,7 +18,8 @@ public class DexActivity extends Activity {
 //        setContentView(R.layout.activity_dex);
         TextView textView = new TextView(this);
         textView.setBackgroundColor(Color.RED);
-        textView.setText("Hello, I am from dex Activity!!!!");
+//        textView.setText("Hello, I am from dex Activity!!!!" + getSelfResources().getString(R.string.app_name));
+        textView.setText("Hello, I am from dex Activity!!!!" + getResources().getString(R.string.app_name));
         textView.setTextSize(30);
         textView.setGravity(Gravity.CENTER);
         Log.w(TAG, "onCreate: ");
